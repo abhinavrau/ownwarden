@@ -95,7 +95,7 @@ write_files:
      mkdir -p home/composer/caddy_tailscale
      # Check out the code
      rm -Rf /home/composer/ownwarden 
-     git clone https://github.com/abhinavrau/bitwarden_gcloud.git /home/composer/ownwarden 
+     git clone https://github.com/abhinavrau/ownwarden.git /home/composer/ownwarden 
      cd /home/composer/ownwarden
      git checkout terraform
      # Link the .env file we created above to the docker-compose directory

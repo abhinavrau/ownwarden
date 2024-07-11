@@ -85,15 +85,16 @@ module "instance_template" {
   stack_type            = "IPV4_ONLY"
   service_account       = { email = "${module.service_accounts.service_account.email}", 
                             scopes = ["https://www.googleapis.com/auth/logging.write", "https://www.googleapis.com/auth/monitoring.write"]}
-  enable_shielded_vm    = true
+  enable_shielded_vm    = false
   machine_type          = "e2-micro"
   metadata = {
     user-data = "${data.cloudinit_config.conf.rendered}"
     google-logging-enabled = true
     google-logging-use-fluentbit = true    
+    cos-update-strategy = "update_enabled"
   }
   region                = var.region
-  source_image_family   = "cos-105-lts" // Use Google's container optimized OS
+  source_image_family   = "cos-117-lts" // Use Google's container optimized OS
   source_image_project  = "cos-cloud"
   tags   = [var.hostname]
 

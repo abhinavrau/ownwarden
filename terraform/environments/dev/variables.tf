@@ -13,15 +13,45 @@
 # limitations under the License.
 
 
-variable "project_id" {}
-variable "env" {}
-variable "region" {}
-variable "zone" {}
-variable "timezone" {}
-variable "vm_hostname" {}
-variable "vpc_name" {}
-variable "subnet_name" {}
-variable "subnet_ip" {}
-variable "tailscale_hostname" {}
-variable "tailscale_domain" {}
-variable "tailscale_auth_key" {}
+variable "project_id" {
+    type = string
+}
+variable "env" {
+    default = "dev"
+    type = string
+}
+variable "region" {
+    default = "us-east1"
+    type = string
+}
+variable "zone" {
+    default = "us-east1-a"
+}
+variable "timezone" {
+    default = "America/New_York"
+    type = string
+}
+variable "vm_hostname" {
+    default = "ownwarden_vm"
+    type = string
+}
+variable "vpc_name" {
+    default = "ownwarden_vpc"
+    type = string
+}
+variable "subnet_name" {
+    default = "ownwarden_subnet"
+    type = string
+}
+variable "subnet_ip" {
+    type = string
+}
+variable "tailscale_hostname" {
+    type = string
+}
+variable "tailscale_domain" {
+    type = string
+}
+variable "tailscale_auth_key" {
+    type = string
+}
