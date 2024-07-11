@@ -97,7 +97,6 @@ write_files:
      rm -Rf /home/composer/ownwarden 
      git clone https://github.com/abhinavrau/ownwarden.git /home/composer/ownwarden 
      cd /home/composer/ownwarden
-     git checkout terraform
      # Link the .env file we created above to the docker-compose directory
      cp /home/composer/.env /home/composer/ownwarden/.env
 - path: /etc/systemd/system/ownwarden.service

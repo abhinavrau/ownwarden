@@ -19,11 +19,12 @@ locals {
 
 provider "google" {
   project = var.project_id
+
 }
 
 module "project-services" {
   source  = "terraform-google-modules/project-factory/google//modules/project_services"
-  version = "~> 14.2"
+  version = "~> 15.0"
 
   project_id = var.project_id
 

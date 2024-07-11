@@ -15,7 +15,7 @@
 
 terraform {
    backend "gcs" {
-    bucket = "arau-ownwarden-tfstate"
+    bucket = "arau-personal-ownwarden-tfstate"
     prefix = "dev"
   } 
 }

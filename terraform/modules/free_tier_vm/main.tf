@@ -78,7 +78,7 @@ module "service_accounts" {
 
 module "instance_template" {
   source  = "terraform-google-modules/vm/google//modules/instance_template"
-  version = "8.0.1"
+  version = "~> 11.1.0"
 
   project_id            = var.project_id
   subnetwork            = var.subnet
@@ -94,7 +94,7 @@ module "instance_template" {
     cos-update-strategy = "update_enabled"
   }
   region                = var.region
-  source_image_family   = "cos-117-lts" // Use Google's container optimized OS
+  source_image_family   = "cos-113-lts" // Use Google's container optimized OS
   source_image_project  = "cos-cloud"
   tags   = [var.hostname]
 
@@ -102,7 +102,7 @@ module "instance_template" {
 
 module "compute_instance" {
   source  = "terraform-google-modules/vm/google//modules/compute_instance"
-  version = "8.0.1"
+  version = "~> 11.1.0"
 
   region              = var.region
   zone                = var.zone
