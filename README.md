@@ -34,14 +34,15 @@ Before you start, ensure you have the following:
 
 1. A Google Cloud project. Create one by navigating to https://console.cloud.google.com
 2. A Tailscale account and [auth key](https://tailscale.com/kb/1085/auth-keys). This is to allow Vaultwarden to connect to you tailscale network.
+3. Terraform installed
+4. Google Cloud SDK (gcloud) installed and configured
+
 
 
 ## Step 1: Clone and Configure Project
-
-Open Cloud Shell in the GCP Console and enter the following command
 
 ```bash
 $ git clone https://github.com/abhinavrau/ownwarden.git
 $ cd ownwarden
 ```
-
+## Step 2: 
