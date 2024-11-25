@@ -1,6 +1,6 @@
 #!/bin/bash
 # Install docker-compose
-VERSION="1.27.4"
+VERSION="1.29.2"
 
 echo "* Add an alias for docker-compose to the shell configuration file ..."
 echo alias docker-compose="'"'docker run --rm \

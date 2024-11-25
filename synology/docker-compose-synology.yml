@@ -1,0 +1,111 @@
+version: '3.7'
+
+
+services:
+  bitwarden:
+    # Standard Bitwarden is very resource-heavy and cannot run on micro cloud instances
+    # Vaultwarden is a Rust (mostly) feature-complete implementation of Bitwarden
+    # https://github.com/dani-garcia/vaultwarden
+    image: vaultwarden/server:alpine
+    restart: always
+    container_name: bitwarden
+    depends_on:
+    - tailscale-caddy
+    - proxy-caddy
+    volumes:
+    - ${PWD}/bitwarden:/data
+    - ${PWD}/utilities/backup.sh:/backup.sh:ro
+    environment:
+    - LOG_FILE=/data/bitwarden.log
+    - WEBSOCKET_ENABLED=true            # required for websockets
+    - SHOW_PASSWORD_HINT=false
+    - DOMAIN=https://${TAILSCALE_DOMAIN}          # DOMAIN is set in .env but doesn't have protocol prefix
+    - SMTP_FROM_NAME=Bitwarden (${TAILSCALE_DOMAIN})
+    - IP_HEADER=X-Forwarded-For
+    - ADMIN_TOKEN                       # Value-less variables are set in .env
+    - SIGNUPS_ALLOWED
+    - SMTP_HOST
+    - SMTP_FROM
+    - SMTP_PORT
+    - SMTP_SECURITY
+    - SMTP_USERNAME
+    - SMTP_PASSWORD
+    - YUBICO_CLIENT_ID
+    - YUBICO_SECRET_KEY
+    - YUBICO_SERVER
+    - ORG_CREATION_USERS
+    - BACKUP
+    - BACKUP_DAYS
+    - BACKUP_DIR
+    - BACKUP_EMAIL_FROM_NAME
+    - BACKUP_ENCRYPTION_KEY
+    - BACKUP_EMAIL_TO
+    - BACKUP_EMAIL_NOTIFY
+    - BACKUP_RCLONE_CONF
+    - BACKUP_RCLONE_DEST
+    command: >
+      sh -c 'if [ -n "$BACKUP" ];
+             then
+               apk --update --no-cache add sqlite
+               ln -sf /proc/1/fd/1 /var/log/backup.log &&
+               sed -i "/ash \\/backup\\.sh /d" /etc/crontabs/root &&
+               echo "$BACKUP_SCHEDULE ash /backup.sh $BACKUP" >> /etc/crontabs/root &&
+               crond -d 8;
+             fi &&
+             exec /start.sh'
+
+
+  tailscale-caddy:
+    hostname: tailscale-caddy
+    image: abhinavrau/caddy_tailscale:latest
+    container_name: caddy_tailscale
+    environment:
+      TAILSCALE_AUTH_KEY: ${TAILSCALE_AUTH_KEY:?err}
+      TAILSCALE_HOSTNAME: ${TAILSCALE_HOSTNAME}
+      TAILSCALE_STATE_ARG: "/var/lib/tailscale_state/tailscale.state"
+      TAILSCALE_STATE_DIR: "/var/lib/tailscale_state/"
+      TS_PORT: "8443"
+    volumes:
+      # a volume is used but it could be a local directory.
+      - ${PWD}/caddy_tailscale/tailscale_state:/var/lib/tailscale_state/
+      - ${PWD}/caddy_tailscale/Caddyfile:/etc/caddy/Caddyfile
+      - ${PWD}/caddy_tailscale/data:/data
+      - ${PWD}/caddy_tailscale/config:/config
+
+   # Proxy for access on local LAN for machines that tailscale cannot be installed on.
+  proxy-caddy:
+    # Caddy provides an automatic HTTPS reverse proxy with Let's Encrypt cert provisioning
+    # https://caddyserver.com/
+    image: abhinavrau/caddy-duckdns
+    restart: always
+    container_name:  proxy-caddy
+    volumes:
+    - ${PWD}/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+    - ${PWD}/caddy/data:/data
+    - ${PWD}/caddy/caddycerts:/root/.caddy
+    ports:
+    - 443:443
+    dns:
+    - 1.1.1.1
+    - 8.8.8.8
+    environment:
+    - LOG_FILE=/data/logs/caddy.log
+    - ACME_AGREE=true                   # agree to ACME for auto HTTPS
+    - DOMAIN                      # LetsEncrypt domain to use.
+    - EMAIL
+    - DUCKDNS_API_TOKEN  # Duck DNS API Token get Let's Encrypt cert using DNS challenge.
+
+  watchtower:
+    # Watchtower will pull down your new image, gracefully shut down your existing container
+    # and restart it with the same options that were used when it was deployed initially
+    # https://github.com/containrrr/watchtower
+    image: containrrr/watchtower
+    restart: always
+    container_name: watchtower
+    depends_on:
+    - bitwarden
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+    - WATCHTOWER_CLEANUP=true
+    - WATCH

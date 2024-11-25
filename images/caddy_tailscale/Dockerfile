@@ -1,5 +1,5 @@
 
-FROM caddy:2.6-builder AS builder
+FROM caddy:2.8-builder AS builder
 
 RUN xcaddy build
 
