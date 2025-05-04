@@ -1,0 +1,6 @@
+{
+  "name": "OwnWarden Nix Development Environment",
+  "image": "ghcr.io/zombiezen/codespaces-nix",
+  "features": {},
+  "postCreateCommand": "bash .devcontainer/postCreate.sh"
+}
