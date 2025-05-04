@@ -2,5 +2,16 @@
   "name": "OwnWarden Nix Development Environment",
   "image": "ghcr.io/zombiezen/codespaces-nix",
   "features": {},
-  "postCreateCommand": "bash .devcontainer/postCreate.sh"
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscode-icons-team.vscode-icons",
+        "hashicorp.terraform",
+        "golang.go"
+      ],
+      "settings": {
+        "editor.formatOnSave": true
+      }
+    }
+  }
 }
