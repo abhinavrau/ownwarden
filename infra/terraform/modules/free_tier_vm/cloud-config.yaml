@@ -100,9 +100,8 @@ write_files:
      echo "Installing Docker Compose V2 plugin..."
      COMPOSE_PLUGIN_DIR=
      
-     # The following commands require sudo. Ensure 'composer' user has necessary sudo permissions
-     # or that this script is run in a context where sudo is available non-interactively.
-     sudo mkdir -p /home/composer/.docker/cli-plugins
+     
+     mkdir -p /home/composer/.docker/cli-plugins
      echo "Downloading Docker Compose "
      curl -SL "https://github.com/docker/compose/releases/download/v2.36.0/docker-compose-linux-x86_64" -o "/home/composer/.docker/cli-plugins/docker-compose"
      echo "Making Docker Compose plugin executable..."
