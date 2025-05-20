@@ -1,16 +1,9 @@
 #!/bin/bash
 # Install docker-compose
-VERSION="1.27.4"
-
-echo "* Add an alias for docker-compose to the shell configuration file ..."
-echo alias docker-compose="'"'docker run --rm \
--v /var/run/docker.sock:/var/run/docker.sock \
--v "$PWD:$PWD" \
--w="$PWD" \
-docker/compose:'"$VERSION"''"'" >> ~/.bashrc
+VERSION="2.3"
 
 echo "* Pull container image for docker-compose ..."
-docker pull docker/compose:$VERSION
+docker pull docker:$VERSION
 echo "* Done"
 
 

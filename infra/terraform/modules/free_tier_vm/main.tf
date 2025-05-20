@@ -34,6 +34,7 @@ data template_file "cloud-init" {
     tailscale_auth_key   = var.tailscale_auth_key
     project_id           = var.project_id
     region               = var.region
+    artifact_registry_repo_id = var.artifact_registry_repo_id
     timezone = var.timezone
   }
 }

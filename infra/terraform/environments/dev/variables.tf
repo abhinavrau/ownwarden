@@ -57,3 +57,7 @@ variable "tailscale_auth_key" {
     type = string
     sensitive = true
 }
+variable "artifact_registry_repo_id" {
+    type = string
+    default = "ownwarden"
+}

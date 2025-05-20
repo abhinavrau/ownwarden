@@ -54,7 +54,7 @@ services:
 
   tailscale-caddy:
     hostname: tailscale-caddy
-    image: us-east1-docker.pkg.dev/abhi-personal-373819/ownwarden/caddy_tailscale:latest
+    image: "${GOOGLE_REGION}-docker.pkg.dev/${GOOGLE_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_ID}/caddy_tailscale:latest"
     environment:
       TAILSCALE_AUTH_KEY: ${TAILSCALE_AUTH_KEY:?err}
       TAILSCALE_HOSTNAME: ${TAILSCALE_HOSTNAME}

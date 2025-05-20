@@ -82,7 +82,7 @@ resource "google_artifact_registry_repository" "ownwarden_repository" {
 
   project       = var.project_id
   location      = var.region
-  repository_id = "ownwarden" # You can change this ID
+  repository_id = var.artifact_registry_repo_id
   description   = "Docker repository for Ownwarden"
   format        = "DOCKER"
 

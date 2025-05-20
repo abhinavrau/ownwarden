@@ -16,6 +16,8 @@ write_files:
       TAILSCALE_DOMAIN=${tailscale_domain}
       GOOGLE_PROJECT_ID=${project_id}
       GOOGLE_REGION=${region}
+      ARTIFACT_REGISTRY_REPO_ID=${artifact_registry_repo_id}
+     
 
       # Local Directory to store things.
       PWD=/home/composer
@@ -90,36 +92,72 @@ write_files:
   permissions: "0755"
   owner: composer
   content: |
-     #!/bin/bash  
-     # Create directories for things we don't want to lose on reboot
-     mkdir -p home/composer/vautlwarden_data
-     mkdir -p home/composer/caddy_tailscale
+    #!/bin/bash  
+    # This script is run as the user 'composer' and is used to check out the latest code
+    region="us-east1"
+    project_id="abhi-personal-373819"
+    artifact_registry_repo_id="ownwarden"
+    # Set the timezone to UTC
+    # Check out the latest code
+    echo "Step 1: Checking out the latest code..."
+    echo "--------------------------------------------------"
 
-     # Install Docker Compose V2 plugin (manual installation for all users)
-     # Based on: https://docs.docker.com/compose/install/linux/#install-the-plugin-manually
-     echo "Installing Docker Compose V2 plugin..."
-     COMPOSE_PLUGIN_DIR=
-     
-     
-     mkdir -p /home/composer/.docker/cli-plugins
-     echo "Downloading Docker Compose "
-     curl -SL "https://github.com/docker/compose/releases/download/v2.36.0/docker-compose-linux-x86_64" -o "/home/composer/.docker/cli-plugins/docker-compose"
-     echo "Making Docker Compose plugin executable..."
-     chmod +x "/home/composer/.docker/cli-plugins/docker-compose"
-     echo "Docker Compose V2 plugin installed. Verifying installation:"
-     docker compose version || echo "Docker compose command not found or failed. Check installation."
+    rm -Rf /home/composer/ownwarden 
+    git clone https://github.com/abhinavrau/ownwarden.git /home/composer/ownwarden 
+    cd /home/composer/ownwarden
 
+    # Link the .env file we created above to the docker-compose directory
+    cp /home/composer/.env /home/composer/ownwarden/.env
 
-     # Check out the latest code
-     rm -Rf /home/composer/ownwarden 
-     git clone https://github.com/abhinavrau/ownwarden.git /home/composer/ownwarden 
-     cd /home/composer/ownwarden
+    # Build the docker image and push to artifact registry
+    echo "Step 2: Building Docker image..."
+    docker build -t "caddy_tailscale:latest" -f "images/caddy_tailscale/Dockerfile" "images/caddy_tailscale"
+    if [ $? -ne 0 ]; then
+      echo "Error: Docker build failed."
+      exit 1
+    fi
+    echo "Docker image built successfully: caddy_tailscale:latest"
+    echo "--------------------------------------------------"
 
-     # Link the .env file we created above to the docker-compose directory
-     cp /home/composer/.env /home/composer/ownwarden/.env
+    echo "Step 3: Tagging image for Artifact Registry..."
+    docker tag "caddy_tailscale:latest" "${region}-docker.pkg.dev/${${project_id}}/${artifact_registry_repo_id}/caddy_tailscale:latest"
 
-     # Build the docker image and put to artifact registry
-     ./utilities/build_and_push_caddy_tailscale.sh
+    if [ $? -ne 0 ]; then
+      echo "Error: Docker tag failed."
+      exit 1
+    fi
+    echo "Image tagged successfully: ${region}-docker.pkg.dev/${${project_id}}/${artifact_registry_repo_id}/caddy_tailscale:latest"
+    echo "--------------------------------------------------"
+    echo "Step 4: Pushing image to Artifact Registry..."
+
+    docker push "${region}-docker.pkg.dev/${${project_id}}/${artifact_registry_repo_id}/caddy_tailscale:latest"
+    if [ $? -ne 0 ]; then
+      echo "Error: Docker push failed. Ensure you are authenticated (e.g., 'gcloud auth configure-docker ${region}-docker.pkg.dev')."
+      exit 1
+    fi
+    echo "Image pushed successfully to Artifact Registry!"
+    echo "Full image path: ${region}-docker.pkg.dev/${project_id}/${artifact_registry_repo_id}/caddy_tailscale:latest"
+    echo "--------------------------------------------------"
+
+    echo "Pull docker image for docker compose ..."
+    docker pull docker:v2.36.1
+    if [ $? -ne 0 ]; then
+      echo "Error: Docker pull failed."
+      exit 1
+    fi
+    echo "Docker image pulled successfully: docker:v2.36.1"
+    echo "--------------------------------------------------"
+    TZ=${TZ}
+
+    # Local time to schedule reboot. This is 2am
+    TIME=03:00
+    SCHEDULED=$(eval "date -d 'TZ=\"$TZ\" $TIME' +%H:%M")
+    #update_engine_client --block_until_reboot_is_needed
+    shutdown -r $SCHEDULED
+    if [ $? -ne 0 ]; then
+      echo "Error: Scheduling Shutdown  failed."
+      exit 1
+    fi
 
 - path: /etc/systemd/system/ownwarden.service
   permissions: "0644"
@@ -133,8 +171,8 @@ write_files:
     User=composer
     Environment="HOME=/home/composer"
     ExecStartPre=bash /home/composer/checkout.sh
-    ExecStart=/usr/bin/env DOCKER_CONFIG=/home/composer/ownwarden/.docker /usr/local/bin/docker-compose --project-directory /home/composer/ownwarden up
-    ExecStop=/usr/bin/env DOCKER_CONFIG=/home/composer/ownwarden/.docker /usr/local/bin/docker-compose --project-directory /home/composer/ownwarden rm -f
+    ExecStart=/usr/bin/docker run --rm -v  /var/run/docker.sock:/var/run/docker.sock -v "/home/composer/ownwarden/.docker:/root/.docker" -v "/home/composer/ownwarden:/home/composer/ownwarden" -w="/home/composer/ownwarden" docker compose up
+    ExecStop=/usr/bin/docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "/home/composer/ownwarden/.docker:/root/.docker" -v "/home/composer/ownwarden:/home/composer/ownwarden" -w="/home/composer/ownwarden" docker compose rm -f
     Restart=on-failure
     RestartSec=10
     [Install]

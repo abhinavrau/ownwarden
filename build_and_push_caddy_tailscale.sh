@@ -79,12 +79,12 @@ echo "--------------------------------------------------"
 echo ""
 echo "Step 3: Pushing image to Artifact Registry..."
 echo "Note: Ensure you are authenticated with gcloud and Docker is configured for Artifact Registry."
-echo "You might need to run: gcloud auth configure-docker ${GOOGLE_REGION}-docker.pkg.dev"
+echo "You might need to run: gcloud auth configure-docker ${region}-docker.pkg.dev"
 
 docker push "${ARTIFACT_REGISTRY_IMAGE_PATH}"
 
 if [ $? -ne 0 ]; then
-  echo "Error: Docker push failed. Ensure you are authenticated (e.g., 'gcloud auth configure-docker ${GOOGLE_REGION}-docker.pkg.dev')."
+  echo "Error: Docker push failed. Ensure you are authenticated (e.g., 'gcloud auth configure-docker ${region}-docker.pkg.dev')."
   exit 1
 fi
 echo "Image pushed successfully to Artifact Registry!"
