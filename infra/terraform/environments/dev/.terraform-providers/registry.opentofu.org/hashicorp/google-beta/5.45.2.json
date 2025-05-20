@@ -1,0 +1,10 @@
+{
+  "archives": {
+    "linux_amd64": {
+      "hashes": [
+        "h1:KkOlqypKHYYvfzrqVPdhfiyHwYeafFy0WD805a01eSg="
+      ],
+      "url": "terraform-provider-google-beta_5.45.2_linux_amd64.zip"
+    }
+  }
+}

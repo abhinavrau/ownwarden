@@ -1,5 +1,5 @@
 
-FROM caddy:2.6-builder AS builder
+FROM caddy:2.8.4-builder AS builder
 
 RUN xcaddy build
 
@@ -23,4 +23,3 @@ ENV XDG_DATA_HOME /data
 WORKDIR /srv
 
 CMD "start.sh"
-

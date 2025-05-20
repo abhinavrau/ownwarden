@@ -1,0 +1,10 @@
+{
+  "archives": {
+    "linux_amd64": {
+      "hashes": [
+        "h1:dkGeAxGbAGgglocp0fl1OzvT6O4KKsJTEsCW0ixdQJs="
+      ],
+      "url": "terraform-provider-cloudinit_2.3.7_linux_amd64.zip"
+    }
+  }
+}

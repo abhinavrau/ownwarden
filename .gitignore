@@ -81,4 +81,6 @@ terraform.rc
 .history
 .ionide
 
+# Devbox
+.devbox/
 # End of https://www.toptal.com/developers/gitignore/api/terraform,go,visualstudiocode

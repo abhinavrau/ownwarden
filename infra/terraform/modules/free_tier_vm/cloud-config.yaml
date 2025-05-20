@@ -1,0 +1,146 @@
+#cloud-config
+users:
+- name: composer
+  uid: 2000
+  groups: docker
+write_files:
+- path: /home/composer/.env
+  permissions: "0755"
+  owner: composer
+  content: |
+      ### GLOBAL VARIABLES ###
+      # Domain name for Bitwarden to run on Tailscale DNS. It always end with ts.net
+      # Make sure to create a tailnet name in the DNS section of your Tailscale admin page.
+      TAILSCALE_AUTH_KEY=${tailscale_auth_key}
+      TAILSCALE_HOSTNAME=${tailscale_hostname}
+      TAILSCALE_DOMAIN=${tailscale_domain}
+      GOOGLE_PROJECT_ID=${project_id}
+      GOOGLE_REGION=${region}
+
+      # Local Directory to store things.
+      PWD=/home/composer
+      
+      # Timezone - used by some containers for logs / cron
+      # Find your location on this list and use the value in TZ Database Name, e.g Europe/Rome:
+      #   https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+      TZ=${timezone}
+
+
+      ### BITWARDEN VARIABLES ###
+
+      # Setting up Bitwarden for the first time can be done in two ways:
+      # Uncomment the method you want to use / comment the one you don't
+      # Method 1. [RECOMMENDED] because it avoids the admin page entirely; using the admin
+      #   page overrides these environmental variables which can cause confusion.
+      #   1. Set up your primary account(s) while SIGNUPS_ALLOWED=true
+      #   2. Set SIGNUPS_ALLOWED=false
+      #   3. Set the SMTP details above to enable e-mail invitation
+      #   4. Invite other users from within Bitwarden
+      #   Keep ADMIN_TOKEN blank to disable access to the admin page entirely.
+      SIGNUPS_ALLOWED=false
+      ADMIN_TOKEN=
+      # Method 2. Use the admin page to create your first user(s) then disable it.
+      #   1. Set ADMIN_TOKEN using gthe command `openssl rand -base64 48`
+      #   2. Use the admin page (/admin) to create your initial user(s).
+      #   3. Disable the admin page by clearing the token (ADMIN_TOKEN=)
+      #SIGNUPS_ALLOWED=false
+      #ADMIN_TOKEN=
+
+      # Specfiy which user email addresses can create organizations
+      # Leave blank to allow all users
+      ORG_CREATION_USERS=
+
+      # Bitwarden Backup Options
+      #
+      #
+      # GENERAL OPTIONS:
+      #
+      # How often to run the backup script; default is daily at midnight
+      BACKUP_SCHEDULE=0 0 * * *
+      # How many days of backups to keep
+      BACKUP_DAYS=30
+      # Directory to place backups in (& sync from in rclone)
+      BACKUP_DIR=/data/backups
+      # Emails can be sent for either email backup or notifying of rclone|local backup
+      BACKUP_EMAIL_FROM_NAME="Bitwarden Backup"
+      # Optional encryption key for backup
+      # BACKUP_ENCRYPTION_KEY="<key to encrypt backup - optional, bw data is encrypted at rest>"
+      # Email address to send backup (BACKUP=email) or notifications (BACKUP_NOTIFY=true)
+      BACKUP_EMAIL_TO="<email to send the backup to>"
+      # Send email notification for rclone|local backup jobs
+      BACKUP_EMAIL_NOTIFY=false
+      #
+      #
+      # Backup type is one of local|email|rclone - uncomment one:
+      #
+      # LOCAL BACKUP OPTIONS
+      #
+      # Just uncomment this
+      BACKUP=local
+
+      # EMAIL address to use with Let's Encrypt certificate provisioning
+      EMAIL=ab@ab.com
+
+      ### WATCHTOWER VARIABLES ###
+
+      # How often should watchtower check for updated container images? Default is every Sunday at 3am
+      WATCHTOWER_SCHEDULE=0 0 3 ? * 0
+      
+- path: /home/composer/checkout.sh
+  permissions: "0755"
+  owner: composer
+  content: |
+     #!/bin/bash  
+     # Create directories for things we don't want to lose on reboot
+     mkdir -p home/composer/vautlwarden_data
+     mkdir -p home/composer/caddy_tailscale
+
+     # Install Docker Compose V2 plugin (manual installation for all users)
+     # Based on: https://docs.docker.com/compose/install/linux/#install-the-plugin-manually
+     echo "Installing Docker Compose V2 plugin..."
+     COMPOSE_PLUGIN_DIR="/home/composer/.docker/cli-plugins"
+     COMPOSE_VERSION="v2.36.0" # Using a specific recent stable version, can be updated as needed. The user-provided doc link showed v2.36.0, but I'll stick to a slightly older one for broader compatibility unless specified.
+     # The following commands require sudo. Ensure 'composer' user has necessary sudo permissions
+     # or that this script is run in a context where sudo is available non-interactively.
+     sudo mkdir -p "$COMPOSE_PLUGIN_DIR"
+     echo "Downloading Docker Compose ${COMPOSE_VERSION} to ${COMPOSE_PLUGIN_DIR}/docker-compose..."
+     sudo curl -SL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-x86_64" -o "${COMPOSE_PLUGIN_DIR}/docker-compose"
+     echo "Making Docker Compose plugin executable..."
+     sudo chmod +x "${COMPOSE_PLUGIN_DIR}/docker-compose"
+     echo "Docker Compose V2 plugin installed. Verifying installation:"
+     docker compose version || echo "Docker compose command not found or failed. Check installation."
+
+
+     # Check out the latest code
+     rm -Rf /home/composer/ownwarden 
+     git clone https://github.com/abhinavrau/ownwarden.git /home/composer/ownwarden 
+     cd /home/composer/ownwarden
+
+     # Link the .env file we created above to the docker-compose directory
+     cp /home/composer/.env /home/composer/ownwarden/.env
+
+     # Build the docker image and put to artifact registry
+     ./utilities/build_and_push_caddy_tailscale.sh
+
+- path: /etc/systemd/system/ownwarden.service
+  permissions: "0644"
+  owner: root
+  content: |
+    [Unit]
+    Description=Ownwarden Service
+    Requires=docker.service network-online.target
+    After=docker.service network-online.target
+    [Service]
+    User=composer
+    Environment="HOME=/home/composer"
+    ExecStartPre=bash /home/composer/checkout.sh
+    ExecStart=/usr/bin/env DOCKER_CONFIG=/home/composer/ownwarden/.docker /usr/local/bin/docker-compose --project-directory /home/composer/ownwarden up
+    ExecStop=/usr/bin/env DOCKER_CONFIG=/home/composer/ownwarden/.docker /usr/local/bin/docker-compose --project-directory /home/composer/ownwarden rm -f
+    Restart=on-failure
+    RestartSec=10
+    [Install]
+    WantedBy=multi-user.target
+runcmd:
+- systemctl daemon-reload
+- systemctl enable --now --no-block ownwarden.service
+- systemctl start node-problem-detector

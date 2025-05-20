@@ -54,7 +54,7 @@ services:
 
   tailscale-caddy:
     hostname: tailscale-caddy
-    image: abhinavrau/caddy_tailscale:latest
+    image: us-east1-docker.pkg.dev/abhi-personal-373819/ownwarden/caddy_tailscale:latest
     environment:
       TAILSCALE_AUTH_KEY: ${TAILSCALE_AUTH_KEY:?err}
       TAILSCALE_HOSTNAME: ${TAILSCALE_HOSTNAME}
@@ -67,6 +67,3 @@ services:
       - ${PWD}/caddy_tailscale/tailscale_state:/var/lib/tailscale_state/
       - ${PWD}/caddy_tailscale/data:/data
       - ${PWD}/caddy_tailscale/config:/config
-
-
-
