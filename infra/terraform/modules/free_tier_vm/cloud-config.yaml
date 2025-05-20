@@ -98,15 +98,15 @@ write_files:
      # Install Docker Compose V2 plugin (manual installation for all users)
      # Based on: https://docs.docker.com/compose/install/linux/#install-the-plugin-manually
      echo "Installing Docker Compose V2 plugin..."
-     COMPOSE_PLUGIN_DIR="/home/composer/.docker/cli-plugins"
-     COMPOSE_VERSION="v2.36.0" # Using a specific recent stable version, can be updated as needed. The user-provided doc link showed v2.36.0, but I'll stick to a slightly older one for broader compatibility unless specified.
+     COMPOSE_PLUGIN_DIR=
+     
      # The following commands require sudo. Ensure 'composer' user has necessary sudo permissions
      # or that this script is run in a context where sudo is available non-interactively.
-     sudo mkdir -p "$COMPOSE_PLUGIN_DIR"
-     echo "Downloading Docker Compose ${COMPOSE_VERSION} to ${COMPOSE_PLUGIN_DIR}/docker-compose..."
-     sudo curl -SL "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-linux-x86_64" -o "${COMPOSE_PLUGIN_DIR}/docker-compose"
+     sudo mkdir -p /home/composer/.docker/cli-plugins
+     echo "Downloading Docker Compose "
+     curl -SL "https://github.com/docker/compose/releases/download/v2.36.0/docker-compose-linux-x86_64" -o "/home/composer/.docker/cli-plugins/docker-compose"
      echo "Making Docker Compose plugin executable..."
-     sudo chmod +x "${COMPOSE_PLUGIN_DIR}/docker-compose"
+     chmod +x "/home/composer/.docker/cli-plugins/docker-compose"
      echo "Docker Compose V2 plugin installed. Verifying installation:"
      docker compose version || echo "Docker compose command not found or failed. Check installation."
 
