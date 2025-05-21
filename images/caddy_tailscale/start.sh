@@ -9,7 +9,7 @@ until tailscale up --authkey="${TAILSCALE_AUTH_KEY}" --hostname="${TAILSCALE_HOS
     sleep 0.1
 done
 echo "---------Starting Tailscale proxy----------"
-tailscale serve https / http://127.0.0.1:${TS_PORT:-8080}
+tailscale serve --bg --https=443 127.0.0.1:8080
 
 echo "---------Starting Caddy ----------"
 caddy run \
