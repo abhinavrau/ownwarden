@@ -8,7 +8,7 @@ services:
     restart: always
     container_name: bitwarden
     depends_on: 
-    - tailscale-caddy
+    - caddy-tailscale
     volumes:
     - ${PWD}/vautlwarden_data:/data
     - ${PWD}/ownwarden/utilities/backup.sh:/backup.sh:ro
@@ -52,9 +52,9 @@ services:
              exec /start.sh'
 
 
-  tailscale-caddy:
-    hostname: tailscale-caddy
-    image: "${GOOGLE_REGION}-docker.pkg.dev/${GOOGLE_PROJECT_ID}/${ARTIFACT_REGISTRY_REPO_ID}/caddy_tailscale:latest"
+  caddy-tailscale:
+    hostname: caddy-tailscale
+    image: caddy_tailscale:latest
     environment:
       TAILSCALE_AUTH_KEY: ${TAILSCALE_AUTH_KEY:?err}
       TAILSCALE_HOSTNAME: ${TAILSCALE_HOSTNAME}
