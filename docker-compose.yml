@@ -63,7 +63,7 @@ services:
       TS_PORT: "8443"
     volumes:
       # a volume is used but it could be a local directory.
-      - ${PWD}/ownwarden/Caddyfile:/etc/caddy/Caddyfile
+      - ${PWD}/Caddyfile:/etc/caddy/Caddyfile
       - ${PWD}/caddy_tailscale/tailscale_state:/var/lib/tailscale_state/
       - ${PWD}/caddy_tailscale/data:/data
       - ${PWD}/caddy_tailscale/config:/config
