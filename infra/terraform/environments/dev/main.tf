@@ -70,6 +70,7 @@ module "ownwarden_vm" {
   tailscale_hostname = var.tailscale_hostname
   tailscale_domain = var.tailscale_domain
   tailscale_auth_key = var.tailscale_auth_key
+  artifact_registry_repo_id = var.artifact_registry_repo_id
 
   depends_on = [
     module.project-services,

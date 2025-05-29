@@ -23,3 +23,4 @@ variable "timezone" {}
 variable "tailscale_hostname" {}
 variable "tailscale_domain" {}
 variable "tailscale_auth_key" {}
+variable "artifact_registry_repo_id" {}

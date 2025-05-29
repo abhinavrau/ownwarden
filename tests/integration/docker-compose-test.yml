@@ -1,0 +1,24 @@
+# This Docker Compose file sets up Vaultwarden accessible via Tailscale.
+include:
+  - ../../docker-compose.yml
+services:
+  tailscale-integration-test:
+    image: tailscale/tailscale:latest
+    container_name: ownwarden-integration-test
+    hostname: ${TAILSCALE_HOSTNAME}-integration-test # Hostname in your Tailnet
+    env_file:
+      - path: ./.env 
+        required: true # Load environment variables from .env file
+    environment:
+      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY_INTEGRATION_TEST:?err} #Tailscale auth key (TS_AUTHKEY) is not set in .env}
+      - TS_HOSTNAME=${TAILSCALE_HOSTNAME}-integration-test # Optional, or set your preferred hostname
+      - TS_ACCEPT_DNS=true # Accept DNS settings from Tailscale
+      - TS_USERSPACE=false # Run in kernel mode
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+    restart: unless-stopped
+    depends_on:
+      - tailscale
+      - vaultwarden

@@ -3,5 +3,7 @@
 # Except this file
 !.gitignore
 
-# Except backups folder
+# Except folders we want to create
 !/backups
+!/tailscale_state
+!/vaultwarden_data

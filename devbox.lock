@@ -220,6 +220,70 @@
           "store_path": "/nix/store/5azlfblak86zzjsn1fagw8lksb3sz7n0-opentofu-1.9.1"
         }
       }
+    },
+    "tailscale@latest": {
+      "last_modified": "2025-05-17T07:32:44Z",
+      "resolved": "github:NixOS/nixpkgs/3fcbdcfc707e0aa42c541b7743e05820472bdaec#tailscale",
+      "source": "devbox-search",
+      "version": "1.82.5",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/j0y83c1xc2hi9n9j474cgm1ig7sh2sna-tailscale-1.82.5",
+              "default": true
+            },
+            {
+              "name": "derper",
+              "path": "/nix/store/jvffn4gxcbf3kd8fiflf3a6r40d97nfp-tailscale-1.82.5-derper"
+            }
+          ],
+          "store_path": "/nix/store/j0y83c1xc2hi9n9j474cgm1ig7sh2sna-tailscale-1.82.5"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/24d2j14fdmr375bghwrzn097nkk5avn3-tailscale-1.82.5",
+              "default": true
+            },
+            {
+              "name": "derper",
+              "path": "/nix/store/wl7abwfgpix069b92yagrmryvyi7nlc0-tailscale-1.82.5-derper"
+            }
+          ],
+          "store_path": "/nix/store/24d2j14fdmr375bghwrzn097nkk5avn3-tailscale-1.82.5"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/3xi98jq512k4slizs18pbary2q96ycqi-tailscale-1.82.5",
+              "default": true
+            },
+            {
+              "name": "derper",
+              "path": "/nix/store/58fgnxy99ay707wj5ar835j19sfs7v1h-tailscale-1.82.5-derper"
+            }
+          ],
+          "store_path": "/nix/store/3xi98jq512k4slizs18pbary2q96ycqi-tailscale-1.82.5"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/nmvhir1bpqy58py1kaf7lasybmm304c8-tailscale-1.82.5",
+              "default": true
+            },
+            {
+              "name": "derper",
+              "path": "/nix/store/6i5sky9v1i0ma85b1v0jivqd736cvx97-tailscale-1.82.5-derper"
+            }
+          ],
+          "store_path": "/nix/store/nmvhir1bpqy58py1kaf7lasybmm304c8-tailscale-1.82.5"
+        }
+      }
     }
   }
 }

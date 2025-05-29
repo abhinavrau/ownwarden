@@ -4,7 +4,8 @@
     "go@1.24.1",
     "opentofu@1.9.1",
     "google-cloud-sdk@latest",
-    "git@latest"
+    "git@latest",
+    "tailscale@latest"
   ],
   "shell": {
     "init_hook": [
