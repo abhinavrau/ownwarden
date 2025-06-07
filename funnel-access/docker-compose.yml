@@ -1,0 +1,57 @@
+
+include: ../docker-compose.yml
+services:
+  tailscale:
+    image: tailscale/tailscale:latest
+    container_name: tailscale-fa-service # Unique name for funnel-access tailscale
+    hostname: ${TAILSCALE_FUNNEL_HOSTNAME:-funnel-on-tailscale} # Unique hostname for this service
+    env_file:
+      - path: ./.env # Assumes funnel-access/.env contains necessary Tailscale vars
+        required: true
+    environment:
+      - TS_AUTHKEY=${TAILSCALE_AUTH_KEY:?err}
+      - TS_HOSTNAME=${TAILSCALE_FUNNEL_HOSTNAME}
+      - TS_ACCEPT_DNS=true
+      - TS_STATE_DIR=/var/lib/tailscale
+      - TS_USERSPACE=false # Run in kernel mode
+      - TS_SERVE_CONFIG=/funnel-access-config/serve-config.json # Path inside the container
+      - TS_CERT_DOMAIN=${TAILSCALE_FUNNEL_ACCESS_HOSTNAME}.${TAILSCALE_DOMAIN} # For TLS certificate
+      # Example: - TS_EXTRA_ARGS=--advertise-tags=tag:funnel-access
+    volumes:
+      - ./data/tailscale_state_funnel:/var/lib/tailscale # Unique persistent state directory
+      - ../ts_config:/config
+      - ./ts-funnel-access-config:/funnel-access-config # Mount directory containing serve-config.json
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    cap_add:
+      - net_admin
+    restart: unless-stopped
+
+  funnel_access:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: funnel-access-service
+    network_mode: service:tailscale-fa-service # Share network with this file's tailscale service
+    env_file:
+      - path: ./.env
+        required: true
+    environment:
+      - PORT=8080 # Internal port for the funnel_access application
+      # Ensure FUNNEL_KEY uses the Tailscale FQDN for the service
+      - FUNNEL_KEY=${TAILSCALE_FUNNEL_HOSTNAME}.${TAILSCALE_DOMAIN}:443
+      # SERVE_CONFIG_PATH default in Go code is /config/serve-config.json, which is fine.
+    volumes:
+      # The /config volume is primarily for tailscale to read serve-config.json and write certs.
+      # funnel_access might read serve-config.json if SERVE_CONFIG_PATH is set to /config/serve-config.json
+      # and it needs to, but its primary interaction is via network through tailscale.
+      # If funnel_access needs to *write* to serve-config.json, this mount is okay,
+      # but typically tailscale manages its certs and serve config.
+      # The original volume was: - ../ts_config:/config:rw
+      # Keeping it for now, assuming funnel_access might still need to interact with it.
+      - ../ts_config:/config:rw
+    # ports: # Removed as Tailscale will handle external exposure via its FQDN and TLS
+    #   - "8080:8080"
+    depends_on:
+      - tailscale # Depends on the tailscale service defined in this file
+    restart: unless-stopped

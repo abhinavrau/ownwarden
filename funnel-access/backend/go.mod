@@ -1,0 +1,17 @@
+module github.com/ownwarden/funnel-access/backend
+
+go 1.24.1
+
+require (
+	github.com/gorilla/csrf v1.7.3
+	github.com/gorilla/mux v1.8.1
+	github.com/mattn/go-sqlite3 v1.14.28
+	github.com/stretchr/testify v1.10.0
+)
+
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
+)
